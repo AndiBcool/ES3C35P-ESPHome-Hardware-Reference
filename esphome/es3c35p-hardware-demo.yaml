@@ -1,0 +1,429 @@
+# ES3C35P hardware reference / ESPHome 2026.9.0
+# Tested source configuration adapted from Guinea Buddy, no project-specific art.
+# Requires includes/*.h, Wi-Fi secrets, FAT32 microSD for audio.
+# Guinea Buddy v1.7.7 - 48-kHz-Aufnahmetest (Robby + Aufnahme + Abspielen)
+# Guinea Buddy v1.7.5 - ES8311 ADC gain slider (0 to +32 dB)
+# Aufnahme, SD-Karte und native Wiedergabe aus v1.5 unveraendert.
+esphome:
+  name: es3c35p-lab
+  friendly_name: ES3C35P Hardware Lab
+  includes:
+    - includes/guinea_sd_test.h
+    - includes/guinea_native_wav.h
+    - includes/guinea_wav_web.h
+  on_boot:
+    - priority: -100
+      then:
+        - lambda: |-
+            guinea_buddy::sd_test_once();
+    - priority: -110
+      then:
+        - lambda: |-
+            guinea_native::init(id(guinea_mic), id(guinea_speaker));
+    - priority: -200
+      then:
+        - lambda: |-
+            guinea_web::start();
+    # Gespeicherten ADC-Wert erst nach Codec-Initialisierung anwenden.
+    - priority: -250
+      then:
+        - delay: 3s
+        - number.set:
+            id: guinea_adc_gain
+            value: !lambda 'return id(guinea_adc_gain).state;'
+    - priority: 600
+      then:
+        - light.turn_on:
+            id: backlight
+            brightness: 100%
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    advanced:
+      include_builtin_idf_components:
+        - fatfs
+        - esp_http_server
+
+psram:
+  mode: octal
+  speed: 80MHz
+  ignore_not_found: false
+
+logger:
+  level: DEBUG
+  hardware_uart: USB_SERIAL_JTAG
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+api:
+
+ota:
+  - platform: esphome
+
+spi:
+  - id: lcd_bus
+    type: quad
+    clk_pin: GPIO12
+    data_pins: [GPIO11, GPIO13, GPIO14, GPIO9]
+
+i2c:
+  - id: bus_a
+    sda: GPIO38
+    scl: GPIO39
+    frequency: 400kHz
+    scan: true
+
+
+# Nativer ES8311 Codec
+audio_dac:
+  - platform: es8311
+    id: guinea_codec
+    i2c_id: bus_a
+    address: 0x18
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    use_mclk: true
+    use_microphone: false
+    mic_gain: 24DB
+
+# Home Assistant Lautstaerkeregler, Wert bleibt nach Neustart erhalten.
+number:
+  - platform: template
+    id: guinea_volume
+    name: "ES3C35P Speaker Volume"
+    icon: mdi:volume-high
+    unit_of_measurement: "%"
+    min_value: 0
+    max_value: 100
+    step: 5
+    initial_value: 85
+    restore_value: true
+    optimistic: true
+    mode: slider
+    set_action:
+      - audio_dac.set_volume:
+          id: guinea_codec
+          volume: !lambda 'return x / 100.0f;'
+
+# ADC-Lautstaerke: Register 0x17, 0xBF=0 dB, jeder Schritt +0,5 dB.
+# Gespeicherten Reglerwert nach dem Boot erneut ins Register schreiben.
+  - platform: template
+    id: guinea_adc_gain
+    name: "ES3C35P Mic ADC Gain"
+    icon: mdi:microphone
+    unit_of_measurement: "dB"
+    min_value: 0
+    max_value: 32
+    step: 0.5
+    mode: slider
+    optimistic: true
+    restore_value: true
+    initial_value: 28
+    # Der Regler speichert den letzten Wert; beim Boot wird er erneut
+    # ins Codec-Register geschrieben (siehe on_boot oben).
+    set_action:
+      - lambda: |-
+          // Gain 0...32 dB -> Register 0xBF...0xFF, 0,5 dB je Schritt.
+          float db = x;
+          if (db < 0.0f) db = 0.0f;
+          if (db > 32.0f) db = 32.0f;
+          const uint8_t target = static_cast<uint8_t>(191 + static_cast<int>(db * 2.0f + 0.5f));
+          uint8_t before = 0;
+          if (!id(guinea_codec).read_byte(0x17, &before)) {
+            ESP_LOGE("guinea_gain", "ADC 0x17 nicht lesbar, keine Aenderung");
+            return;
+          }
+          if (!id(guinea_codec).write_byte(0x17, target)) {
+            ESP_LOGE("guinea_gain", "ADC 0x17 Schreibfehler");
+            return;
+          }
+          uint8_t after = 0;
+          if (id(guinea_codec).read_byte(0x17, &after)) {
+            ESP_LOGI("guinea_gain", "ADC 0x17: 0x%02X -> 0x%02X (Soll 0x%02X, %.1f dB)", before, after, target, db);
+          }
+
+# Nativer I2S-Bus
+i2s_audio:
+  - id: guinea_i2s
+    i2s_lrclk_pin: GPIO21
+    i2s_bclk_pin: GPIO18
+    i2s_mclk_pin: GPIO17
+
+# Nativer Lautsprecher
+speaker:
+  - platform: i2s_audio
+    id: guinea_speaker
+    i2s_audio_id: guinea_i2s
+    i2s_dout_pin: GPIO15
+    dac_type: external
+    audio_dac: guinea_codec
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    channel: mono
+
+# Natives ESPHome-I2S-Mikrofon, analoger Eingang des ES8311
+microphone:
+  - platform: i2s_audio
+    id: guinea_mic
+    i2s_audio_id: guinea_i2s
+    i2s_din_pin: GPIO16
+    adc_type: external
+    pdm: false
+    sample_rate: 48000
+    bits_per_sample: 16bit
+    channel: left
+
+# SC8002B Verstaerker: GPIO1 aktiv LOW
+switch:
+  - platform: gpio
+    id: guinea_amp
+    name: "ES3C35P Amplifier"
+    pin:
+      number: GPIO1
+      inverted: true
+    restore_mode: ALWAYS_OFF
+
+
+output:
+  - platform: ledc
+    id: backlight_pwm
+    pin: GPIO41
+    frequency: 1000Hz
+
+light:
+  - platform: monochromatic
+    id: backlight
+    name: "Display Brightness"
+    output: backlight_pwm
+    restore_mode: ALWAYS_OFF
+
+display:
+  - platform: mipi_spi
+    id: lcd
+    spi_id: lcd_bus
+    model: CUSTOM
+    bus_mode: quad
+    cs_pin: GPIO10
+    data_rate: 40MHz
+    dimensions:
+      width: 320
+      height: 480
+    color_order: RGB
+    invert_colors: true
+    draw_rounding: 4
+    init_sequence:
+      - delay 120ms
+      - [0xF1, 0x00]
+      - [0x60, 0x00, 0x00, 0x00]
+      - [0x65, 0x80]
+      - [0x79, 0x06]
+      - [0x7B, 0x00, 0x08, 0x08]
+      - [0x80, 0x55, 0x62, 0x2F, 0x17, 0xF0, 0x52, 0x70, 0xD2, 0x52, 0x62, 0xEA]
+      - [0x81, 0x26, 0x52, 0x72, 0x27]
+      - [0x84, 0x92, 0x25]
+      - [0x87, 0x10, 0x10, 0x58, 0x00, 0x02, 0x3A]
+      - [0x88, 0x00, 0x00, 0x2C, 0x10, 0x04, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00, 0x06]
+      - [0x89, 0x00, 0x00, 0x00]
+      - [0x8A, 0x13, 0x00, 0x2C, 0x00, 0x00, 0x2C, 0x10, 0x10, 0x00, 0x3E, 0x19]
+      - [0x8B, 0x15, 0xB1, 0xB1, 0x44, 0x96, 0x2C, 0x10, 0x97, 0x8E]
+      - [0x8C, 0x1D, 0xB1, 0xB1, 0x44, 0x96, 0x2C, 0x10, 0x50, 0x0F, 0x01, 0xC5, 0x12, 0x09]
+      - [0x8D, 0x0C]
+      - [0x8E, 0x33, 0x01, 0x0C, 0x13, 0x01, 0x01]
+      - [0xB3, 0x00, 0x30]
+      - [0xF1, 0x00]
+      - [0x71, 0xD0]
+      - [0x66, 0x02, 0x3F]
+      - [0xBE, 0x26, 0x00, 0x9D]
+      - [0x70, 0x01, 0xA6, 0x11, 0x40, 0xE0, 0x00, 0x11, 0x60, 0x11, 0x00, 0x00, 0x1A]
+      - [0x90, 0x04, 0x04, 0x55, 0x74, 0x00, 0x40, 0x43, 0x2D, 0x2D]
+      - [0x91, 0x04, 0x04, 0x55, 0x75, 0x00, 0x40, 0x42, 0x2D, 0x2D]
+      - [0x92, 0x04, 0x44, 0x55, 0xC0, 0x06, 0x00, 0x07, 0x05, 0x90, 0x2D]
+      - [0x93, 0x04, 0x43, 0x11, 0x00, 0x00, 0x00, 0x00, 0x05, 0x90, 0x2D]
+      - [0x94, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]
+      - [0x95, 0x96, 0x16, 0x00, 0x00, 0xFF]
+      - [0x96, 0x44, 0x53, 0x03, 0x12, 0x23, 0x24, 0x06, 0x05, 0x9A, 0x2D, 0x00, 0x44]
+      - [0x97, 0x44, 0x53, 0x47, 0x56, 0x20, 0x20, 0x02, 0x01, 0x9A, 0x2D, 0x00, 0x44]
+      - [0xBA, 0x55, 0x9A, 0x2D, 0x9A, 0x2D]
+      - [0x9A, 0x40, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00]
+      - [0x9B, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00]
+      - [0x9C, 0x5C, 0x12, 0x00, 0x00, 0x10, 0x12, 0x00, 0x00, 0x10, 0x02, 0x00, 0x00, 0x00]
+      - [0x9D, 0x8A, 0x51, 0x00, 0x00, 0x00, 0x80, 0x1E, 0x01]
+      - [0x9E, 0x51, 0x00, 0x00, 0x00, 0x80, 0x1E, 0x01]
+      - [0xB4, 0x1D, 0x1C, 0x1E, 0x0B, 0x14, 0x02, 0x13, 0x09, 0x1E, 0x00, 0x1E, 0x10]
+      - [0xB5, 0x1D, 0x1C, 0x1E, 0x0A, 0x15, 0x03, 0x11, 0x08, 0x1E, 0x01, 0x1E, 0x12]
+      - [0xB6, 0x77, 0x77, 0x00, 0x0A, 0xFF, 0x0A, 0xFF]
+      - [0x86, 0xC6, 0x04, 0xB1, 0x02, 0x58, 0x12, 0x58, 0x0C, 0x13, 0x01, 0xA5, 0x00, 0xA5, 0xA5]
+      - [0xB7, 0x07, 0x0A, 0x0E, 0x06, 0x05, 0x03, 0x2B, 0x03, 0x03, 0x42, 0x07, 0x10, 0x10, 0x2E, 0x3F, 0x0D]
+      - [0xB8, 0x07, 0x0A, 0x0D, 0x05, 0x05, 0x02, 0x2B, 0x02, 0x03, 0x42, 0x06, 0x10, 0x0F, 0x2E, 0x3F, 0x0D]
+      - [0xB9, 0x23, 0x23]
+      - [0xBF, 0x10, 0x14, 0x14, 0x0B, 0x0B, 0x0B]
+      - [0xF2, 0x00]
+      - [0x73, 0x04, 0xDA, 0x12, 0x54, 0x47]
+      - [0x77, 0x6B, 0x5B, 0xFD, 0xC3, 0xC5]
+      - [0x7A, 0x15, 0x27]
+      - [0x7B, 0x04, 0x57]
+      - [0x7E, 0x01, 0x0E]
+      - [0xBF, 0x36]
+      - [0xE3, 0x40, 0x40]
+      - [0xF0, 0x00]
+      - [0xD0, 0x00]
+      - [0x2A, 0x00, 0x00, 0x01, 0x3F]
+      - [0x2B, 0x00, 0x00, 0x01, 0xDF]
+      - [0x11]
+      - delay 200ms
+
+touchscreen:
+  - platform: st7123
+    id: touch
+    i2c_id: bus_a
+    address: 0x55
+    reset_pin: GPIO48
+    display: lcd
+    on_touch:
+      - lambda: |-
+          ESP_LOGI("touch", "TOUCH x=%d y=%d raw_x=%d raw_y=%d",
+                   touch.x, touch.y, touch.x_raw, touch.y_raw);
+
+lvgl:
+  displays: [lcd]
+  touchscreens: [touch]
+  rotation: 0
+  buffer_size: 25%
+  pages:
+    - id: main_page
+      widgets:
+        - label:
+            align: TOP_MID
+            y: 28
+            text: "ES3C35P Hardware Test"
+        - label:
+            id: readout
+            align: CENTER
+            text: "Ready"
+        - button:
+            align: BOTTOM_LEFT
+            x: 8
+            y: -12
+            width: 145
+            height: 65
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "RECORD"
+            on_click:
+              - if:
+                  condition:
+                    lambda: 'return guinea_native::recording.load();'
+                  then:
+                    - script.execute: stop_recording
+                  else:
+                    - script.execute: start_recording
+        - button:
+            align: BOTTOM_RIGHT
+            x: -8
+            y: -12
+            width: 145
+            height: 65
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "PLAY"
+            on_click:
+              - script.execute: play_recording
+
+# Puffer von Audio-Callback zur microSD in kurzen Portionen leeren.
+interval:
+  - interval: 20ms
+    then:
+      - lambda: |- 
+          guinea_native::pump();
+
+script:
+  - id: start_recording
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: 'return guinea_native::begin_record();'
+          then:
+            - lvgl.label.update:
+                id: readout
+                text: "Aufnahme laeuft..."
+            - microphone.capture: guinea_mic
+  - id: stop_recording
+    mode: single
+    then:
+      - microphone.stop_capture: guinea_mic
+      - wait_until:
+          condition:
+            lambda: 'return id(guinea_mic)->is_stopped();'
+          timeout: 3s
+      - lambda: |-
+          guinea_native::finish_record();
+      - lvgl.label.update:
+          id: readout
+          text: "WAV gespeichert"
+  - id: play_recording
+    mode: single
+    then:
+      - if:
+          condition:
+            lambda: 'return !guinea_native::recording.load() && !guinea_native::playing.load();'
+          then:
+            - switch.turn_on: guinea_amp
+            - delay: 150ms
+            - audio_dac.mute_off:
+                id: guinea_codec
+            - audio_dac.set_volume:
+                id: guinea_codec
+                volume: !lambda 'return id(guinea_volume).state / 100.0f;' 
+            - if:
+                condition:
+                  lambda: 'return guinea_native::begin_play();'
+                then:
+                  - lvgl.label.update:
+                      id: readout
+                      text: "Wiedergabe..."
+                  - wait_until:
+                      condition:
+                        lambda: 'return guinea_native::play_done.load();'
+                      timeout: 60s
+                  - delay: 1000ms
+                  - lvgl.label.update:
+                      id: readout
+                      text: "Wiedergabe beendet"
+            - switch.turn_off: guinea_amp
+
+
+button:
+  # Nur lesender Register-Dump: keine Aenderung an Codec oder Audio.
+  - platform: template
+    name: "ES8311 Mikrofonregister auslesen"
+    on_press:
+      - lambda: |-
+          ESP_LOGI("guinea_es8311_diag", "ES8311 Registerdiagnose (nur lesen), I2C 0x18");
+          const uint8_t regs[] = {0x0D, 0x0E, 0x14, 0x16, 0x17, 0x18, 0x1C};
+          for (uint8_t reg : regs) {
+            uint8_t value = 0;
+            if (id(guinea_codec).read_byte(reg, &value)) {
+              ESP_LOGI("guinea_es8311_diag", "Register 0x%02X = 0x%02X", reg, value);
+              if (reg == 0x14) {
+                ESP_LOGI("guinea_es8311_diag", "  Eingang: %s; PGA-Code=%u (~%u dB)",
+                         (value & 0x40) ? "DIGITAL/DMIC" : "ANALOG",
+                         (unsigned)(value & 0x0F), (unsigned)(3 * (value & 0x0F)));
+              }
+            } else {
+              ESP_LOGE("guinea_es8311_diag", "Register 0x%02X konnte nicht gelesen werden", reg);
+            }
+          }
+  - platform: template
+    name: "microSD erneut testen"
+    on_press:
+      - lambda: |-
+          guinea_buddy::sd_test_once();
