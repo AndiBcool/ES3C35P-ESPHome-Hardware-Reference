@@ -81,7 +81,7 @@ Ein besonderer Dank geht an **[jlmeredith/ES3C35P](https://github.com/jlmeredith
 
 ## Hinweise zur Veröffentlichung
 
-Dieses Paket enthält **keine** originale Hersteller-Firmware, kein komplettes Flashabbild, keine WLAN-Zugangsdaten, keine privaten WAV-Dateien und keine fremden Grafiken ohne ausgewiesene Herkunft. Das enthaltene Robby-Demobild ist gesondert vom Programmcode zu betrachten. Die ST77922-Initialisierungswerte stammen aus der Hardwareintegrationshistorie; ihre Herkunft/Lizenz sollte vor einer pauschalen Lizenzierung des gesamten Repositories geprüft werden. Drittmaterial wird hier nicht als eigenes Werk beansprucht.
+Dieses Paket enthält **keine** originale Hersteller-Firmware, kein komplettes Flashabbild, keine WLAN-Zugangsdaten, keine privaten WAV-Dateien und keine fremden Grafiken ohne ausgewiesene Herkunft. Das enthaltene Robby-Demobild ist gesondert vom Programmcode zu betrachten. Die ST77922-Registertabelle ist in den LCDWiki-Beispielen dokumentiert und laut [jlmeredith/ES3C35P](https://github.com/jlmeredith/ES3C35P) ebenfalls in der originalen Gerätefirmware enthalten. Unsere ESPHome-Darstellung entspricht der dort dokumentierten Registerfolge; Details unter [Herkunft](HERKUNFT.md). Die Tabelle dient der Hardware-Kompatibilität; damit wird keine pauschale Lizenz für sämtliche Herstellerdateien behauptet. Drittmaterial wird hier nicht als eigenes Werk beansprucht.
 
 ## Robby-Demobild / Nutzungsrechte
 
