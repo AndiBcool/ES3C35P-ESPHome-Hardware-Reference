@@ -83,6 +83,9 @@ Ein besonderer Dank geht an **[jlmeredith/ES3C35P](https://github.com/jlmeredith
 
 Dieses Paket enthält **keine** originale Hersteller-Firmware, kein komplettes Flashabbild, keine WLAN-Zugangsdaten, keine privaten WAV-Dateien und keine fremden Grafiken ohne ausgewiesene Herkunft. Das enthaltene Robby-Demobild ist gesondert vom Programmcode zu betrachten. Die ST77922-Registertabelle ist in den LCDWiki-Beispielen dokumentiert und laut [jlmeredith/ES3C35P](https://github.com/jlmeredith/ES3C35P) ebenfalls in der originalen Gerätefirmware enthalten. Unsere ESPHome-Darstellung entspricht der dort dokumentierten Registerfolge; Details unter [Herkunft](HERKUNFT.md). Die Tabelle dient der Hardware-Kompatibilität; damit wird keine pauschale Lizenz für sämtliche Herstellerdateien behauptet. Drittmaterial wird hier nicht als eigenes Werk beansprucht.
 
-## Robby-Demobild / Nutzungsrechte
+## Lizenz und Robby-Bild
 
-Die Demo verwendet `esphome/robby_display.png` als Hintergrund der Touch-Oberfläche. Es gehört zur Beispieloberfläche, nicht zur notwendigen Hardwareansteuerung. Das Bild ist nur als Demo-Asset beigefügt. Es wird keine allgemeine Lizenz zur Weiterverwendung eingeräumt; für andere Nutzungen ist die Erlaubnis des Rechteinhabers erforderlich.
+Der eigene Programmcode und die eigene Dokumentation stehen unter der [MIT-Lizenz](../../LICENSE), **soweit die erforderlichen Rechte beim Repository-Inhaber liegen**. Für Bestandteile Dritter gelten deren jeweilige Lizenz- und Herkunftshinweise; siehe [Herkunft](HERKUNFT.md).
+
+**Ausnahme – Robby-Bild:** `esphome/robby_display.png` ist **nicht** MIT-lizenziert. **Copyright © 2026 AndiBcool. Alle Rechte vorbehalten.** Das unveränderte Bild darf **nur als Bestandteil dieses unveränderten ES3C35P-Demo-Repositories** heruntergeladen und weitergegeben sowie zum Ausführen, Testen und Vorführen der enthaltenen ES3C35P-Hardware-Demo genutzt werden. Für andere Projekte, eine eigenständige Weitergabe, Bearbeitung oder kommerzielle Verwertung des Bildes ist vorher eine schriftliche Genehmigung erforderlich. Diese Ausnahme schränkt den MIT-lizenzierten Code nicht ein. Siehe [Robby-Bildlizenz](../../esphome/ROBBY-LICENSE.md).
+
