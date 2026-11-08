@@ -1,6 +1,6 @@
 # Provenance and verification
 
-The project evolved from a Guinea Buddy board test. The included YAML is **adapted** from the 48-kHz prototype and uses its final 48-kHz speaker fix. On-device logs established display, touch, codec, I²S, PSRAM, SD and download. No CI or on-device run of the **neutralized** demo is claimed.
+The included hardware-demo YAML is based on a tested 48-kHz board configuration, with neutral device and entity names. The existing C++ helper identifiers were retained for compatibility. On-device logs established display, touch, codec, I²S, PSRAM, SD and download. No CI or on-device run of the **neutralized** demo is claimed.
 
 - LCDWiki product documentation and quick-start: https://www.lcdwiki.com/3.5inch_ESP32-S3_Display
 - Independent hardware documentation: https://github.com/jlmeredith/ES3C35P

@@ -2,9 +2,9 @@
 
 [English / Hauptseite](../../README.md) · [Pinbelegung](PINBELEGUNG.md) · [Fehlersuche](FEHLERSUCHE.md)
 
-Dieses Repository dokumentiert den **lauffähigen Arbeitsstand der 3,5-Zoll-ESP32-S3-Displayhardware**, unabhängig von der eigentlichen Guinea-Buddy-Anwendung. Das Beispiel bietet ein neutrales LVGL-Display mit Touchschaltflächen, ES8311-Audio, 48-kHz-WAV-Aufnahme/Wiedergabe, microSD und WAV-Download im lokalen Netz.
+Dieses Repository dokumentiert den **lauffähigen Arbeitsstand der 3,5-Zoll-ESP32-S3-Displayhardware**, als eigenständige Hardware-Demo mit Robby-Motiv. Das Beispiel bietet ein LVGL-Display mit Touchschaltflächen, ES8311-Audio, 48-kHz-WAV-Aufnahme/Wiedergabe, microSD und WAV-Download im lokalen Netz.
 
-**Stand 08.11.2026:** Die zugrunde liegenden Funktionen wurden mit **ESPHome 2026.9.0** an einem realen Board getestet: Display, Touch, 32-GB-FAT32-microSD, Mikrofon, Lautsprecher und WAV-Download. **Die für dieses Repository neutralisierte YAML wurde noch nicht separat kompiliert oder aufgespielt.** Hardwarevarianten können abweichen.
+**Stand 08.11.2026:** Die zugrunde liegenden Funktionen wurden mit **ESPHome 2026.9.0** an einem realen Board getestet: Display, Touch, 32-GB-FAT32-microSD, Mikrofon, Lautsprecher und WAV-Download. **Die umbenannte und neu verpackte Repository-YAML wurde noch nicht separat kompiliert oder aufgespielt; die zugrunde liegende 48-kHz-Hardwarekonfiguration wurde am Gerät getestet.** Hardwarevarianten können abweichen.
 
 ## Funktionsstand
 
@@ -26,7 +26,8 @@ Dieses Repository dokumentiert den **lauffähigen Arbeitsstand der 3,5-Zoll-ESP3
 
 ```text
 README.md                              englische Hauptseite
-esphome/es3c35p-hardware-demo.yaml    neutrales Hardware-Demo
+esphome/es3c35p-hardware-demo.yaml    Hardware-Demo mit Robby-Bild
+esphome/robby_display.png             Robby-Motiv für die Anzeige
 esphome/includes/guinea_sd_test.h     SDMMC/FAT-Mount
 esphome/includes/guinea_native_wav.h  WAV-Aufnahme/Wiedergabe, 48-kHz-Fix
 esphome/includes/guinea_wav_web.h     HTTP-WAV-Download
@@ -34,7 +35,7 @@ docs/en/                             englische Zusatzdokumentation
 docs/de/                             diese deutsche Dokumentation
 ```
 
-Die Header-Namen enthalten noch `guinea_`, weil wir die bewährte Herkunft der Testimplementierung nachvollziehbar lassen. **Sie benötigen weder Guinea-Buddy-Bilder noch KI-Modelle.**
+Die Header-Dateinamen und Namespaces behalten aus Kompatibilitätsgründen die Kennung `guinea_`. Es handelt sich um interne Bezeichner; die Demo ist eigenständig. **Das Robby-Bild ist Bestandteil der Beispieloberfläche.**
 
 ## Installation mit ESPHome
 
@@ -80,4 +81,8 @@ Ein besonderer Dank geht an **[jlmeredith/ES3C35P](https://github.com/jlmeredith
 
 ## Hinweise zur Veröffentlichung
 
-Dieses Paket enthält **keine** originale Hersteller-Firmware, kein komplettes Flashabbild, keine WLAN-Zugangsdaten, keine privaten WAV-Dateien und keine urheberrechtlich geschützten Grafiken. Die ST77922-Initialisierungswerte stammen aus der Hardwareintegrationshistorie; ihre Herkunft/Lizenz sollte vor einer pauschalen Lizenzierung des gesamten Repositories geprüft werden. Drittmaterial wird hier nicht als eigenes Werk beansprucht.
+Dieses Paket enthält **keine** originale Hersteller-Firmware, kein komplettes Flashabbild, keine WLAN-Zugangsdaten, keine privaten WAV-Dateien und keine fremden Grafiken ohne ausgewiesene Herkunft. Das enthaltene Robby-Demobild ist gesondert vom Programmcode zu betrachten. Die ST77922-Initialisierungswerte stammen aus der Hardwareintegrationshistorie; ihre Herkunft/Lizenz sollte vor einer pauschalen Lizenzierung des gesamten Repositories geprüft werden. Drittmaterial wird hier nicht als eigenes Werk beansprucht.
+
+## Robby-Demobild / Nutzungsrechte
+
+Die Demo verwendet `esphome/robby_display.png` als Hintergrund der Touch-Oberfläche. Es gehört zur Beispieloberfläche, nicht zur notwendigen Hardwareansteuerung. Das Bild ist nur als Demo-Asset beigefügt. Es wird keine allgemeine Lizenz zur Weiterverwendung eingeräumt; für andere Nutzungen ist die Erlaubnis des Rechteinhabers erforderlich.

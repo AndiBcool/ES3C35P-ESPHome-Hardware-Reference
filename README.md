@@ -2,9 +2,9 @@
 
 **English documentation** · [Deutsch](docs/de/README.md) · [Pinout](docs/en/PINOUT.md) · [Troubleshooting](docs/en/TROUBLESHOOTING.md)
 
-A practical ESPHome hardware bring-up and audio/SD reference for the **3.5-inch ESP32-S3 display board** sold as LCDWiki **ES3C35P** (and some WS-32871/rebranded units). This is a **hardware demonstration independent of the Guinea Buddy application**: a plain LVGL screen, touch buttons, ES8311 audio, 4-bit SDMMC WAV recording, playback, and a small read-only WAV download page.
+A practical ESPHome hardware bring-up and audio/SD reference for the **3.5-inch ESP32-S3 display board** sold as LCDWiki **ES3C35P** (and some WS-32871/rebranded units). This is a **hardware reference with the Robby mascot demo UI**: a full-screen illustration, LVGL touch buttons, ES8311 audio, 4-bit SDMMC WAV recording, playback, and a small read-only WAV download page. The mascot is a demonstration asset, not a required hardware component.
 
-**Status (2026-11-08):** The underlying board features were exercised on one physical ESP32-S3 using **ESPHome 2026.9.0** (ESP-IDF). Display, touch, microSD, native I²S recording, speaker playback and HTTP WAV download were observed working. The **genericized demo in this repository has been derived from that working configuration but has not itself been compiled/flashed on a board**. In particular, treat this as a reproducible reference, not a pre-certified firmware release. Other board revisions may differ.
+**Status (2026-11-08):** The underlying board features were exercised on one physical ESP32-S3 using **ESPHome 2026.9.0** (ESP-IDF). Display, touch, microSD, native I²S recording, speaker playback and HTTP WAV download were observed working. The **demo YAML preserves the tested 48-kHz hardware settings, but this renamed/repackaged repository version has not itself been compiled/flashed on a board**. In particular, treat this as a reproducible reference, not a pre-certified firmware release. Other board revisions may differ.
 
 ## Features / evidence
 
@@ -26,7 +26,8 @@ A practical ESPHome hardware bring-up and audio/SD reference for the **3.5-inch 
 
 ```text
 README.md                              English landing page
-esphome/es3c35p-hardware-demo.yaml    Hardware demo without mascot artwork
+esphome/es3c35p-hardware-demo.yaml    Hardware demo with Robby mascot and touch controls
+esphome/robby_display.png             Robby mascot screen image
 esphome/includes/guinea_sd_test.h     SDMMC/FAT mount helper (legacy namespace)
 esphome/includes/guinea_native_wav.h  48-kHz native I²S WAV recorder/player
 esphome/includes/guinea_wav_web.h     HTTP download helper, port 8080
@@ -34,7 +35,7 @@ docs/en/                             English detailed notes
 docs/de/                             Full German documentation
 ```
 
-The C++ helper names still contain `guinea_*` because they are **exactly the source lineage used in the tested prototype**. They do not require the Guinea Buddy application, artwork, AI model, or data. Keeping the names makes troubleshooting against the verified logs easier.
+The C++ helper filenames and namespaces retain their original `guinea_*` identifiers for compatibility with the tested code. These are internal identifiers; the example is a standalone hardware demo.
 
 ## Getting started (ESPHome)
 
@@ -54,6 +55,9 @@ esphome logs es3c35p-hardware-demo.yaml
 The ESPHome Dashboard's **Install** and **Logs** buttons provide equivalent workflows. The initial flash may require a USB cable and bootloader mode; subsequent updates can use OTA once configured.
 
 ### Using the demo
+
+The supplied screen image is `esphome/robby_display.png` (included in this repository). It is displayed behind the record/playback touch controls. This image is part of the sample interface, not a hardware requirement.
+
 
 - Tap **RECORD** to start recording; tap again to stop. Saves `/sdcard/aufnahme.wav` (overwrites the previous recording).
 - Tap **PLAY** to replay through the speaker. The amp enable line is inverted/active LOW.
@@ -78,4 +82,4 @@ Thanks to **[jlmeredith/ES3C35P](https://github.com/jlmeredith/ES3C35P)** for ca
 
 ## Publication and safety
 
-Only source/configuration is included: **no vendor firmware, original flash dump, copyrighted starter ZIP, private Wi-Fi credentials, animal recordings or proprietary art**. The ST77922 register initialization data is derived from board integration material and should be reviewed for provenance/licensing before reuse under a blanket software license. The repository does not claim a license for third-party vendor materials. Contributions welcome after reproducible testing.
+Only source/configuration is included: **no vendor firmware, original flash dump, copyrighted starter ZIP, private Wi-Fi credentials or animal recordings**. The ST77922 register initialization data is derived from board integration material and should be reviewed for provenance/licensing before reuse under a blanket software license. The Robby illustration is supplied as a demonstration asset, separately from the source code. No general reuse license is granted for the image; request permission from the rights holder before reusing it elsewhere. The repository does not claim a license for third-party vendor materials. Contributions welcome after reproducible testing.

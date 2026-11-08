@@ -1,9 +1,8 @@
 # ES3C35P hardware reference / ESPHome 2026.9.0
-# Tested source configuration adapted from Guinea Buddy, no project-specific art.
-# Requires includes/*.h, Wi-Fi secrets, FAT32 microSD for audio.
-# Guinea Buddy v1.7.7 - 48-kHz-Aufnahmetest (Robby + Aufnahme + Abspielen)
-# Guinea Buddy v1.7.5 - ES8311 ADC gain slider (0 to +32 dB)
-# Aufnahme, SD-Karte und native Wiedergabe aus v1.5 unveraendert.
+# ESPHome hardware demo: Robby image, LVGL touch, 48-kHz WAV recording/playback.
+# Requires includes/*.h, robby_display.png, Wi-Fi secrets and FAT32 microSD.
+# Based on the tested 48-kHz hardware configuration; device name and labels are generic.
+# ES8311 ADC gain control: 0 to +32 dB.
 esphome:
   name: es3c35p-lab
   friendly_name: ES3C35P Hardware Lab
@@ -290,6 +289,21 @@ touchscreen:
           ESP_LOGI("touch", "TOUCH x=%d y=%d raw_x=%d raw_y=%d",
                    touch.x, touch.y, touch.x_raw, touch.y_raw);
 
+image:
+  - platform: file
+    file: robby_display.png
+    id: robby_portrait
+    type: RGB565
+    resize: 320x480
+
+font:
+  - file: "gfonts://Roboto"
+    id: font_lg
+    size: 40
+  - file: "gfonts://Roboto"
+    id: font_md
+    size: 24
+
 lvgl:
   displays: [lcd]
   touchscreens: [touch]
@@ -298,24 +312,32 @@ lvgl:
   pages:
     - id: main_page
       widgets:
-        - label:
-            align: TOP_MID
-            y: 28
-            text: "ES3C35P Hardware Test"
+        - image:
+            src: robby_portrait
+            align: TOP_LEFT
+            x: 0
+            y: 0
         - label:
             id: readout
-            align: CENTER
-            text: "Ready"
+            align: TOP_MID
+            y: 354
+            text_font: font_md
+            text_color: 0xFFFFFF
+            bg_color: 0x202530
+            text: "Bereit"
         - button:
-            align: BOTTOM_LEFT
+            id: record_button
+            align: TOP_LEFT
             x: 8
-            y: -12
-            width: 145
-            height: 65
+            y: 409
+            width: 149
+            height: 61
+            bg_color: 0xB73540
             widgets:
               - label:
                   align: CENTER
-                  text: "RECORD"
+                  text_font: font_md
+                  text: "AUFNAHME"
             on_click:
               - if:
                   condition:
@@ -325,15 +347,18 @@ lvgl:
                   else:
                     - script.execute: start_recording
         - button:
-            align: BOTTOM_RIGHT
-            x: -8
-            y: -12
-            width: 145
-            height: 65
+            id: play_button
+            align: TOP_LEFT
+            x: 163
+            y: 409
+            width: 149
+            height: 61
+            bg_color: 0x2372B8
             widgets:
               - label:
                   align: CENTER
-                  text: "PLAY"
+                  text_font: font_md
+                  text: "ABSPIELEN"
             on_click:
               - script.execute: play_recording
 
