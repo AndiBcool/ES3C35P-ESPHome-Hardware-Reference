@@ -6,6 +6,23 @@ A practical ESPHome hardware bring-up and audio/SD reference for the **3.5-inch 
 
 **Status (2026-11-08):** The underlying board features were exercised on one physical ESP32-S3 using **ESPHome 2026.9.0** (ESP-IDF). Display, touch, microSD, native I²S recording, speaker playback and HTTP WAV download were observed working. The **demo YAML preserves the tested 48-kHz hardware settings, but this renamed/repackaged repository version has not itself been compiled/flashed on a board**. In particular, treat this as a reproducible reference, not a pre-certified firmware release. Other board revisions may differ.
 
+
+## Hardware Photos
+
+The following photos show the actual **LCDWiki ES3C35P / WS-32871** board used for this project, featuring the ESP32-S3, a 3.5-inch IPS display, and the connectors on the rear side of the PCB.
+
+| Front View – 3.5-inch Display | Rear View – ESP32-S3 PCB |
+|:---:|:---:|
+| <img src="images/ES3C3SP.jpg" alt="LCDWiki ES3C35P front view with 3.5-inch display" width="320"> | <img src="images/ES3C3SPb.jpg" alt="LCDWiki ES3C35P rear view with ESP32-S3 and connectors" width="320"> |
+
+**Board:** LCDWiki ES3C35P / WS-32871  
+**Microcontroller:** ESP32-S3  
+**Display:** 3.5-inch IPS, 320 × 480 pixels  
+**Memory:** 16 MB Flash / 8 MB PSRAM
+
+For additional technical details, see the [Hardware Pinout](docs/en/PINOUT.md) and [Connector Documentation](docs/CONNECTORS.md).
+
+
 ## Features / evidence
 
 | Feature | Configuration | Evidence |
