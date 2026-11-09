@@ -6,6 +6,21 @@ Dieses Repository dokumentiert den **lauffähigen Arbeitsstand der 3,5-Zoll-ESP3
 
 **Stand 08.11.2026:** Die zugrunde liegenden Funktionen wurden mit **ESPHome 2026.9.0** an einem realen Board getestet: Display, Touch, 32-GB-FAT32-microSD, Mikrofon, Lautsprecher und WAV-Download. **Die umbenannte und neu verpackte Repository-YAML wurde noch nicht separat kompiliert oder aufgespielt; die zugrunde liegende 48-kHz-Hardwarekonfiguration wurde am Gerät getestet.** Hardwarevarianten können abweichen.
 
+## Hardwarefotos
+
+Die folgenden Fotos zeigen das tatsächlich verwendete **LCDWiki ES3C35P / WS-32871** mit ESP32-S3, 3,5-Zoll-IPS-Display und den Anschlüssen auf der Platinenrückseite.
+
+| Vorderseite – 3,5-Zoll-Display | Rückseite – ESP32-S3-Platine |
+|:---:|:---:|
+| <img src="../../images/ES3C3SP.jpg" alt="LCDWiki ES3C35P Vorderseite mit 3,5-Zoll-Display" width="320"> | <img src="../../images/ES3C3SPb.jpg" alt="LCDWiki ES3C35P Rückseite mit ESP32-S3 und Anschlüssen" width="320"> |
+
+**Hardware:** LCDWiki ES3C35P / WS-32871  
+**Mikrocontroller:** ESP32-S3  
+**Display:** 3,5 Zoll IPS, 320 × 480 Pixel  
+**Speicher:** 16 MB Flash / 8 MB PSRAM
+
+Weitere technische Informationen findest du in der [Pinbelegung](PINBELEGUNG.md) und in der [Anschlussdokumentation](../CONNECTORS.md).
+
 ## Funktionsstand
 
 | Baugruppe | Technischer Stand | Nachweis |
