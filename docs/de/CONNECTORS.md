@@ -2,6 +2,11 @@
 
 Diese Dokumentation beschreibt die externen Anschlüsse der Platine anhand des **Originalschaltplans des Herstellers** (`ESP32-S3原理图.pdf`, Blatt 1) und der **ESP32-S3-Pinbelegungstabelle von LCDWiki** (`Eingefügtes Markdown(3).md`, aus LCDWiki übernommen). Aufgeführt werden **elektrische Netzbezeichnungen und Pin-Nummern aus dem Schaltplan**. Die tatsächliche Blickrichtung auf die Platine sowie Steckertyp und Rastermaß sind damit noch nicht überprüft.
 
+## Anschlusspositionen – Platinenrückseite
+
+Die folgende hochauflösende Aufnahme zeigt die Rückseite des ES3C35P-Boards mit den aufgedruckten Anschlussbezeichnungen.
+![ES3C35P PCB Back](../../images/ES3C3SPb_big.jpg)
+
 > **Sicherheit:** Vor dem Verdrahten die Stromversorgung trennen. **P2 führt an Pin 1 +5 V; P3 und P4 führen an Pin 1 dagegen 3,3 V.** Die Pin-Nummerierung darf nicht ohne Prüfung als Reihenfolge von links nach rechts auf der Platinenrückseite interpretiert werden. Pin-1-Markierung und Ausrichtung am echten Board kontrollieren. Niemals 5 V direkt an ESP32-S3-GPIOs anlegen.
 
 ## 1. Vierpolige externe Steckverbinder
