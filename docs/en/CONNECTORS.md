@@ -7,7 +7,7 @@ This document summarizes the board's external connections using the **manufactur
 The following photo shows the rear side of the ES3C35P board,
 including the printed connector labels.
 
-![ES3C35P PCB rear view](../images/ES3C35P_Connectors.jpg)
+![ES3C35P PCB rear view](../images/ES3C35Pb_big.jpg)
 
 > **Safety:** Disconnect power before wiring. **P2 pin 1 is +5 V, whereas P3 and P4 pin 1 are 3.3 V.** Do not assume that the numbering is left-to-right when looking at the back of the assembled board; confirm the physical pin-1 marking and orientation. Do not connect 5 V directly to ESP32-S3 GPIOs.
 
